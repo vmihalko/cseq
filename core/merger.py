@@ -80,7 +80,7 @@ class Merger(core.module.Translator):
 		# Note: cpp does not strip C++-style comments ('//') from the input code, gcc instead does.
 		#cmdline = 'cpp -Iinclude -E -C ' + filename + ' > ' + filename + '.1' + '.c'
 		#cmdline = 'gcc -Iinclude -P -E - '  # hyphen at the end forces input from stdin
-		cmdline = 'gcc %s -nostdinc %s -E -' % (macros,includestring) # hyphen at the end forces input from stdin
+		cmdline = 'clang %s -nostdinc %s -E -' % (macros,includestring) # hyphen at the end forces input from stdin
 		#######cmdline = 'gcc %s -nostdinc %s -E %s' % (macros,includestring,env.inputfile)
 		p = subprocess.Popen(shlex.split(cmdline), stdout=subprocess.PIPE, stdin=subprocess.PIPE, stderr=subprocess.PIPE)
 		# string = p.communicate(input=string)[0] # python 2.7
