@@ -528,7 +528,7 @@ def init():
 
 	# Debug setup.
 	cseqenv.debugpath = core.config.debugpath
-	if not os.path.exists(core.config.debugpath): os.makedirs(core.config.debugpath)
+	if not os.path.exists(core.config.debugpath): os.makedirs(core.config.debugpath,exist_ok=True)
 	elif cseqenv.debug:
 		shutil.rmtree(core.config.debugpath)
 		os.makedirs(core.config.debugpath)
