@@ -333,9 +333,9 @@ class racedetector(core.module.Translator):
                         "void* %s = %s;" % (var_addr, var_name),
                     ]
 
-                    asserts = [  # % TODO: Maybe switch from CPROVER_assert to if-then with __verifier_assert?
-                        '__CPROVER_assert((__cs_thread_to_write_pos[%d] != %s), "Data race found on %s!");'
-                        % (i, var_addr, var_name)
+                    asserts = [
+                        'if (__cs_thread_to_write_pos[%d] == %s) __cs_data_race();'
+                        % (i, var_addr)
                         for i in range(self.thread_no + 1)
                         if i != cur_thr_idx
                     ]
