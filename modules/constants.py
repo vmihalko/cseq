@@ -237,7 +237,7 @@ class constants(core.module.Translator):
 			if n.op == '-': return str(int(lval_str) - int(rval_str))
 			if n.op == '+': return str(int(lval_str) + int(rval_str))
 			if n.op == '*': return str(int(lval_str) * int(rval_str))
-			if n.op == '/' and (int(lval_str) % int(rval_str) == 0): return str(int(lval_str) / int(rval_str))
+			if n.op == '/' and (int(lval_str) % int(rval_str) == 0): return str(int(lval_str) // int(rval_str))
 
 		return '%s %s %s' % (lval_str, n.op, rval_str)
 
