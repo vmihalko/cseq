@@ -138,6 +138,7 @@ class lazyseq(core.module.Translator):
 		self.inputparam('deadlock', 'check for deadlock', '', default=False, optional=True)
 		self.inputparam('nondet-condvar-wakeups', 'spurious conditional variables wakeups', '', default=False, optional=True)
 		self.inputparam('varnamesmap', 'map for replaced variable names', '', default=None, optional=True)
+		self.inputparam('creation-markers', 'mark every thread creation by __symbiotic_mark(creator << 16 | created thread) for witnesses', '', default=False, optional=True)
 
 		self.outputparam('bitwidth')
 		self.outputparam('header')
@@ -153,6 +154,7 @@ class lazyseq(core.module.Translator):
 		deadlock = True if self.getinputparam('deadlock') else False
 		pedanticthreads = False if self.getinputparam('nondet-condvar-wakeups') is None else True
 		self.varnamesmap = self.getinputparam('varnamesmap')
+		self.creationmarkers = self.getinputparam('creation-markers') is not None
 
 		# Schedule control.
 		# TODO TODO TODO this only works with round-robin scheduler!
@@ -231,6 +233,10 @@ class lazyseq(core.module.Translator):
 		else:
 			header = core.utils.printFile('%s/lazyseqBdeadlock.c' % modulepath).replace('<insert-threadsizes-here>',lines)
 			header = header.replace('<insert-all1-here>',  ones)
+
+		# the marks of thread creations are logged by the verifier (Symbiotic's KLEE)
+		if self.creationmarkers:
+			header = 'void __symbiotic_mark(unsigned long);\n' + header
 
 		self.insertheader(header)
 
@@ -641,6 +647,11 @@ class lazyseq(core.module.Translator):
 				args = args + ', %s' % (self.threadindex[fName])
 
 			self.firstthreadcreated = True
+
+			# Mark the creation on its line, in the creating thread, with the
+			# created thread's index; the value of the expression is unchanged.
+			if self.creationmarkers:
+				return '(__symbiotic_mark((__cs_thread_index << 16) | %s), %s(%s))' % (self.threadindex[fName], fref, args)
 
 		# Avoid using pointers to handle mutexes
 		# by changing the function calls,
