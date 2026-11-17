@@ -343,6 +343,16 @@ class workarounds(core.module.Translator):
 
 
 	def visit_Union(self, n):
+		# a union comes out as a struct, its members no longer overlap: keep
+		# the names of its members (and of the members of its anonymous
+		# members) for the race detector, which refuses accesses to them
+		fields, decls = getattr(self.cseqenv, 'unionfields', set()), list(n.decls or [])
+		while decls:
+			d = decls.pop()
+			if d.name: fields.add(d.name)
+			elif isinstance(d.type, (pycparser.c_ast.Struct, pycparser.c_ast.Union)): decls.extend(d.type.decls or [])
+		self.cseqenv.unionfields = fields
+
 		if n.name is None:
 			n.name = 'anonstruct_' + str(self._currentAnonStructsCount)
 			self._currentAnonStructsCount += 1
